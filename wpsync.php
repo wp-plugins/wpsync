@@ -7,7 +7,6 @@ Version: 0.1
 Author: Julian Magnone (julianmagnone@gmail.com)
 Author URI: http://jmagnone.com/
 
-
 Please see WordPress.org default GPL licenses to know more about the license applied for this plugin.
 
 Here are some references that were used in order to build this plugin:

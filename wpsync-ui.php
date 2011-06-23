@@ -10,16 +10,23 @@ function wpsync_show_ui_settings_page()
 		<div class="wrap">
 			<h2>Magn WPSync</h2>
 		
-			<!-- 
+			
 			<div style="float:right; width: 300px; height:auto;"> 
 				<h3>Support</h3>
 				<p>If this plugin was helpful and saved your time, please consider donating in order to support further development.</p>
 				<div>
-				
+					<form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+					<input type="hidden" name="cmd" value="_s-xclick">
+					<input type="hidden" name="hosted_button_id" value="VVE9SYHSM38FY">
+					<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+					<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+					</form>
+
+
 				</div>
 				Thanks!
 			</div>
-			-->
+			
 		
 			<h3>Synchronization</h3>
 

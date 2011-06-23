@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: jmagnone
-Donate link: http://netvivs.com/wpsync
+Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VVE9SYHSM38FY
 Tags: google, spreadsheets, import, synchronize, posts, edit
 Requires at least: 3.0
 Tested up to: 3.1
@@ -13,7 +13,7 @@ WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP p
 
 WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts.
 
-This plugin is useful for example if you want to import lot of rows from a spreadsheet into separate posts and it is intended to be used for those who need a simple way to enter blog posts and don’t like to use the Quick Post feature at WordPress.
+This plugin is useful for example if you want to import lot of rows from a spreadsheet into separate posts and it is intended to be used for those who need a simple way to enter blog posts and don't like to use the Quick Post feature at WordPress.
 
 Instead, you can just write your post drafts into a spreadsheet and configure the plugin to synchronize your rows with WordPress.
 
@@ -24,12 +24,11 @@ Things that you can expect from this plugin:
 * helps you importing rows from a Google Spreadsheet into separeted posts
 * use the Google Spreadsheet to write down ideas and post drafts, for example if you are developing domain names with WordPress or niche websites, but also useful for directories (ie: with local info, phone numbers, custom fields, etc.)
 
-Things that you can't expect from this plugin:
+Things that you won't find on this plugin:
 
 * In the initial version the import is from Google Spreadsheets into WordPress but we'll try to develop the opposite direction (from WP to Google Spreadsheet) soon.
 * This version don't writes back any change on the Google Spreadsheet so the Spreadsheet is only used as read onle, not write mode.
-
-
+* Google Spreadsheets doesn't support rich text format, so if you need HTML for your content you can do that by using HTML tags in the cells
 
 
 
