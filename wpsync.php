@@ -1,66 +1,58 @@
 <?php
 /* 
 Plugin Name: Magn WPSync
-Plugin URI: 
-Description: 
+Plugin URI: http://netvivs.com/wpsync/
+Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts.
 Version: 0.1
-Author: 
-Author URI: http://magn.com/
+Author: Julian Magnone (julianmagnone@gmail.com)
+Author URI: http://jmagnone.com/
 
 
+Please see WordPress.org default GPL licenses to know more about the license applied for this plugin.
 
-https://gist.github.com/770584
+Here are some references that were used in order to build this plugin:
 
-Google Spreadsheet Documentation API 3.0
-http://code.google.com/intl/es/apis/documents/docs/3.0/developers_guide_protocol.html
-
-http://code.google.com/intl/es/apis/spreadsheets/data/3.0/developers_guide.html#ListFeeds
+* Github gist code https://gist.github.com/770584
+* Google Spreadsheet Documentation API 3.0 http://code.google.com/intl/es/apis/documents/docs/3.0/developers_guide_protocol.html
+* Code for listing feeds http://code.google.com/intl/es/apis/spreadsheets/data/3.0/developers_guide.html#ListFeeds
 
 */ 
 
 require_once(dirname(__FILE__) . '/wpsync-ui.php');
 
-
 function widget_wpsync_init() {
 
-	// Check for the required plugin functions. This will prevent fatal
-	// errors occurring when you deactivate the dynamic-sidebar plugin.
-	if ( !function_exists('register_sidebar_widget') ) {
-		return;
-	}
-	
-	//add_filter('template', 'ts_get_template');
-	//add_filter('stylesheet', 'ts_get_stylesheet');
-	
 	// create custom plugin settings menu
 	add_action('admin_menu', 'wpsync_create_menu');
 
 	function wpsync_create_menu() {
 
-		//create new top-level menu
+		//create new top-level menu - maybe we should move this under settings later
 		add_menu_page('WPSync Plugin Settings', 'WPSync Settings', 'administrator', __FILE__, 'wpsync_settings_page',plugins_url('/images/wpsyncicon.png', __FILE__));
 
 		//call register settings function
 		add_action( 'admin_init', 'register_wpsync_settings' );
 	}
 
-
 	function register_wpsync_settings() {
-		//register our settings
+		
+		//register important settings
 		register_setting( 'wpsync-settings-group', 'wpsync_spreadsheet_key' );
 		register_setting( 'wpsync-settings-group', 'wpsync_spreadsheet_sheet' );
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_delete_from_spreadsheet' );
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_update_from_spreadsheet' );
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_delete_from_spreadsheet' );
 		
+		// for categories and other options
 		register_setting( 'wpsync-settings-group', 'wpsync_create_categories_if_not_exist' );
 		register_setting( 'wpsync-settings-group', 'wpsync_create_tags_if_not_exist' );
-		
 		register_setting( 'wpsync-settings-group', 'wpsync_default_category' );
 		register_setting( 'wpsync-settings-group', 'wpsync_default_tags' );
 		
-		register_setting( 'wpsync-settings-group', 'wpsync_default_status' );		
+		register_setting( 'wpsync-settings-group', 'wpsync_debug_mode' );
 		
+		// for default status and more
+		register_setting( 'wpsync-settings-group', 'wpsync_default_status' );		
 	}
 	
 	function wpsync_settings_page()
@@ -75,14 +67,15 @@ function widget_wpsync_init() {
 			
 		} else if (!empty($wpsync_form_action) AND $wpsync_form_action == 'run' )
 		{
+			// run sync (import rows from spreadsheets into posts)
 			wpsync_run_sync();
 		
 		} else if (!empty($wpsync_form_action) AND $wpsync_form_action == 'preview' )
 		{
+			// run a simple preview
 			wpsync_preview_sync();
 
 		} else {
-			
 			// Display default settings page
 			wpsync_show_ui_settings_page();
 		}
@@ -90,6 +83,7 @@ function widget_wpsync_init() {
 	
 	function wpsync_save_settings()
 	{
+		// Hmm, this was not longer used in WP 3.x
 		echo 'Options saved';
 	}
 	
@@ -102,49 +96,57 @@ function widget_wpsync_init() {
 			return FALSE;
 		}
 	
-		//$key = "0As5DEk6l4HCodHp3R3oyRjdKdldtZXI3VzQ4UmJYQUE";
 		wpsync_parse_spreadsheet($key, FALSE);
 	}
 	
 	function wpsync_preview_sync()
 	{
-		$key = get_option('wpsync_spreadsheet_key');
+	
+		$key = trim( get_option('wpsync_spreadsheet_key') );
 		if (empty($key))
 		{
-			echo 'Please enter a Spreadsheet KEY';
+			$message = 'Please enter a Spreadsheet KEY';
+			wpsync_show_error($message);
 			return FALSE;
 		}
-	
-		//$key = "0As5DEk6l4HCodHp3R3oyRjdKdldtZXI3VzQ4UmJYQUE";
+		
 		wpsync_parse_spreadsheet($key);
 	}
 	
+	/*
 	function wpsync_connect_google()
 	{
-	     $key = "0As5DEk6l4HCodHp3R3oyRjdKdldtZXI3VzQ4UmJYQUE";
-//		https://gist.github.com/770584
-		 
+//		https://gist.github.com/770584		 
 		wpsync_parse_spreadsheet($key);
-	}
+	}*/
 	
 	function wpsync_parse_spreadsheet($key, $only_preview = TRUE)
 	{
 	
-		// Parsing this spreadsheet: https://spreadsheets.google.com/pub?key=0Ah0xU81penP1dFNLWk5YMW41dkcwa1JNQXk3YUJoOXc&hl=en&output=html
-		$url = "http://spreadsheets.google.com/feeds/list/{$key}/1/public/values?alt=json";
+		$sheet = trim(get_option('wpsync_spreadsheet_sheet'));
+		if (empty($sheet))
+		{
+			$sheet = "1";
+		}
+		
+	
+		// Parsing this spreadsheet
+		$url = "http://spreadsheets.google.com/feeds/list/{$key}/{$sheet}/public/values?alt=json";
+		echo 'Connecting to '.$url.'<br/>';
+		
 		$file= file_get_contents($url);
-
+		$json = json_decode($file);
+		//var_dump($json);		
 		$posts_in_spreadsheet = array(); //array with external ids
 		$indexes_ss_updated = array(); // used to keep a track about posts indexes in ss that were updated or not
 		
-		$json = json_decode($file);
-
 		$i = 0;
 		$rows = $json->{'feed'}->{'entry'};
-		
+
 		if (empty($rows))
 		{
-			echo 'Failed to get spreadsheet. Please check KEY is valid and spreadsheet is published to the web';
+			$message = 'Failed to retrieve spreadsheet. Please check key is valid and spreadsheet is published to the web';
+			wpsync_show_error( $message );
 			return FALSE;
 		}
 		
@@ -225,7 +227,7 @@ function widget_wpsync_init() {
 		);
 		//$posts = get_posts($args);
 		$my_query = new WP_Query( $args );
-		echo $my_query->post_count . ' posts matching criteria in WordPress'; 
+		echo $my_query->post_count . " posts found in WordPress already sync'ed"; 
 		
 		$posts_in_wordpress = array();
 		
@@ -329,6 +331,8 @@ function widget_wpsync_init() {
 			
 		} else {
 		
+			wpsync_show_preview( $posts_in_spreadsheet );
+		
 			echo 'Preview is done!';
 		}
 		
@@ -371,8 +375,15 @@ function widget_wpsync_init() {
 			echo "Inserting new post in WordPress ".$post_id." Title:{$title} Status:{$status}   <br/>";
 			
 			var_dump($post_id);
+			
+			// Add external id
 			$meta_key = "wpsync_external_id";
 			$meta_value = $external_id;
+			add_post_meta($post_id, $meta_key, $meta_value, TRUE);
+			
+			// Add Date
+			$meta_key = "wpsync_created_on";
+			$meta_value = date('Y-m-d H:i:s');
 			add_post_meta($post_id, $meta_key, $meta_value, TRUE);
 			
 			foreach($meta as $meta_key => $meta_value)

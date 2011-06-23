@@ -53,8 +53,8 @@ function wpsync_show_ui_settings_page()
 				</div>
 				
 				<div>
-					<label for="wpsync_spreadsheet_key">Spreadsheet Sheet</label>
-					<input disabled="disabled" type="text" name="wpsync_spreadsheet_sheet" value="<?php echo get_option('wpsync_spreadsheet_sheet'); ?>" style="width: 100px;" />
+					<label for="wpsync_spreadsheet_key">Spreadsheet Sheet (1,2,3...)</label>
+					<input type="text" name="wpsync_spreadsheet_sheet" value="<?php echo get_option('wpsync_spreadsheet_sheet', "1"); ?>" style="width: 200px;" />
 				</div>
 				
 				<div>
@@ -65,6 +65,12 @@ function wpsync_show_ui_settings_page()
 				<div>
 					<input type="checkbox" name="wpsync_allow_update_from_spreadsheet" value="1" <?php echo (get_option('wpsync_allow_update_from_spreadsheet')=='1'?'checked':''); ?> />
 					Check if entries are updated in the original spreadsheet and then update the posts in WordPress
+					<span></span>
+				</div>
+				
+				<div>
+					<input type="checkbox" name="wpsync_debug_mode" value="1" <?php echo (get_option('wpsync_debug_mode')=='1'?'checked':''); ?> />
+					Debug mode enabled
 					<span></span>
 				</div>
 				
@@ -117,4 +123,56 @@ function wpsync_show_ui_settings_page()
 } // end wpsync_show_ui_settings_page
 
 
+function wpsync_show_preview($rows)
+{
+	
+	?>
+		<table class="wp-list-table widefat fixed posts" cellspacing="0"> 
+			<thead> 
+			<tr> 
+				<th width="50">Id</th>
+				<th>Title</th>
+			</tr>
+			</thead>
+			<tbody>
+			<?php foreach($rows as $row): ?>
+			<?php
+			
+			?>
+				<tr>
+				<td><?= $row['id'] ?></td>
+				<td><?= $row['title'] ?></td>
+				</tr>
+			<?php endforeach ?>
+			</tbody>
+		</table>
+	<?
+	
+}
 
+
+function wpsync_show_message($message)
+{
+?>
+	<div id="message" class="updated below-h2 fade" style="margin-top:30px; margin-left:5px; width:600px; cursor:pointer;" onclick="jQuery('div#message').css('display','none');">
+    <p style="float:right; font-size:10px; font-variant:small-caps; color:#600000; padding-top:4px;">(close)</p>
+    <p><b><?= $message ?></b></p>
+	</div>
+	<script type="text/javascript">
+		//jQuery(document).ready(function($) {$(".fade").fadeTo(5000,1).fadeOut(3000);});
+	</script>
+<?php
+}
+
+function wpsync_show_error($message)
+{
+?>
+	<div id="message" class="error below-h2 fade" style="margin-top:30px; margin-left:5px; width:600px; cursor:pointer;" onclick="jQuery('div#message').css('display','none');">
+    <p style="float:right; font-size:10px; font-variant:small-caps; color:#600000; padding-top:4px;">(close)</p>
+    <p><b><?= $message ?></b></p>
+	</div>
+	<script type="text/javascript">
+		//jQuery(document).ready(function($) {$(".fade").fadeTo(5000,1).fadeOut(3000);});
+	</script>
+<?php
+}

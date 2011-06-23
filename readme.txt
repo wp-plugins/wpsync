@@ -11,7 +11,7 @@ WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP p
 
 == Description ==
 
-WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP posts.
+WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts.
 
 This plugin is useful for example if you want to import lot of rows from a spreadsheet into separate posts and it is intended to be used for those who need a simple way to enter blog posts and don’t like to use the Quick Post feature at WordPress.
 
@@ -38,6 +38,16 @@ Things that you can't expect from this plugin:
 1. Upload `wpsync` folder to `/wp-content/plugins/` directory
 1. Activate the plugin through the 'Plugins' menu in WordPress
 1. Go to WPSync settings page and configure your Spreadsheet key
+
+In order to use your Spreadsheet created in Google Docs, you need to:
+
+1. Create a new spreadsheet
+1. Create a few mandatory fields: id, title, content
+1. Publish your spreadsheet and get the spreadsheet KEY from the shared URL
+1. Copy the KEY and paste it in the WPSync settings page.
+
+
+
 
 == Frequently Asked Questions ==
 
