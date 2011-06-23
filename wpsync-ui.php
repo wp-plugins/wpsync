@@ -4,12 +4,13 @@
 function wpsync_show_ui_settings_page()
 {
 
-	$categories = get_categories();
+	$categories = get_categories( array('hide_empty'=>0) );
 
 	?>
 		<div class="wrap">
 			<h2>Magn WPSync</h2>
 		
+			<!-- 
 			<div style="float:right; width: 300px; height:auto;"> 
 				<h3>Support</h3>
 				<p>If this plugin was helpful and saved your time, please consider donating in order to support further development.</p>
@@ -18,6 +19,7 @@ function wpsync_show_ui_settings_page()
 				</div>
 				Thanks!
 			</div>
+			-->
 		
 			<h3>Synchronization</h3>
 
@@ -55,6 +57,7 @@ function wpsync_show_ui_settings_page()
 				<div>
 					<label for="wpsync_spreadsheet_key">Spreadsheet Sheet (1,2,3...)</label>
 					<input type="text" name="wpsync_spreadsheet_sheet" value="<?php echo get_option('wpsync_spreadsheet_sheet', "1"); ?>" style="width: 200px;" />
+					<span><small>for now, you can use 1 for first spreadsheet, 2 for second one, etc. We plan to show a list of spreadsheets soon</small></span>
 				</div>
 				
 				<div>
@@ -89,12 +92,19 @@ function wpsync_show_ui_settings_page()
 				<div>
 					<p>Should we assign a default category if not exist?</p>
 					<select name="wpsync_default_category">
+						<!-- <?php echo get_option('wpsync_default_category') ?> -->
 						<option name="" <?php echo (get_option('wpsync_default_category')==''?'selected':''); ?>  ></option>
 						<?php foreach($categories as $cat): ?>
-						<option name="<?= $cat->cat_ID ?>"  <?php echo (get_option('wpsync_default_category')== $cat->cat_ID ?'selected':''); ?> ><?= $cat->cat_name ?></option>
+						<option  value="<?= $cat->cat_ID ?>"  <?php echo (get_option('wpsync_default_category')==$cat->cat_ID ?'selected':''); ?> ><?= $cat->cat_name ?></option>
 						<?php endforeach; ?>
 					</select>
 					<span></span>
+				</div>
+				
+				<div>
+					<label for="wpsync_default_tags">Default tags (separated by comma)</label>
+					<input type="text" name="wpsync_default_tags" value="<?php echo get_option('wpsync_default_tags', "1"); ?>" style="width: 400px;" />
+					<span><small></small></span>
 				</div>
 				
 				<hr/>
@@ -104,7 +114,7 @@ function wpsync_show_ui_settings_page()
 					<select name="wpsync_default_status">
 						<option name="" <?php echo (get_option('wpsync_default_status')==''?'selected':''); ?>  ></option>
 						<option name="draft" <?php echo (get_option('wpsync_default_status')=='draft'?'selected':''); ?> >draft</option>
-						<option name="published" <?php echo (get_option('wpsync_default_status')=='published'?'selected':''); ?> >published</option>
+						<option name="publish" <?php echo (get_option('wpsync_default_status')=='publish'?'selected':''); ?> >publish</option>
 						<option name="private" <?php echo (get_option('wpsync_default_status')=='private'?'selected':''); ?> >private</option>
 						<option name="future" <?php echo (get_option('wpsync_default_status')=='future'?'selected':''); ?> >future</option>
 						<option name="pending" <?php echo (get_option('wpsync_default_status')=='pending'?'selected':''); ?> >pending</option>
