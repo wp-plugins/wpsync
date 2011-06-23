@@ -58,6 +58,11 @@ function widget_wpsync_init() {
 	{
 		$wpsync_form_action = $_POST['wpsync_form_action'];
 		
+		
+		$message = "Please notice this plugin is still under development. If you have questions, suggestions or any other comment please kindly write to julianmagnone@gmail.com ";
+		wpsync_show_message($message);
+		
+		
 		if (!empty($wpsync_form_action) AND $wpsync_form_action == 'save' )
 		{
 			// Update options
