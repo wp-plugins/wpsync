@@ -19,15 +19,15 @@ Instead, you can just write your post drafts into a spreadsheet and configure th
 
 I coded this plugin for my own usage but after getting some user's feedback I decided to publish it on the directory.
 
-Things that you can expect from this plugin:
+What you can expect from this plugin:
 
-* helps you importing rows from a Google Spreadsheet into separeted posts
-* use the Google Spreadsheet to write down ideas and post drafts, for example if you are developing domain names with WordPress or niche websites, but also useful for directories (ie: with local info, phone numbers, custom fields, etc.)
+* Helps you importing rows from a Google Spreadsheet into separeted posts in WordPress.
+* Use the Google Spreadsheet to enter ideas and post drafts, for example if you are developing domain names with WordPress or niche websites, but also useful for directories (ie: with local info, phone numbers, custom fields, etc.)
 
-Things that you won't find on this plugin:
+What you can't expect from this plugin (at least in the initial releases):
 
-* In the initial version the import is from Google Spreadsheets into WordPress but we'll try to develop the opposite direction (from WP to Google Spreadsheet) soon.
-* This version don't writes back any change on the Google Spreadsheet so the Spreadsheet is only used as read onle, not write mode.
+* In the initial version the utility works from Google Spreadsheets into WordPress but not viceversa. We'll eventually add the opposite direction soon.
+* This version doesn't writes back any change on the Google Spreadsheet so the Spreadsheet is only used as read only.
 * Google Spreadsheets doesn't support rich text format, so if you need HTML for your content you can do that by using HTML tags in the cells
 
 
@@ -40,23 +40,22 @@ Things that you won't find on this plugin:
 
 In order to use your Spreadsheet created in Google Docs, you need to:
 
-1. Create a new spreadsheet
-1. Create a few mandatory fields: id, title, content
-1. Publish your spreadsheet and get the spreadsheet KEY from the shared URL
+1. Create a new spreadsheet in Google Docs
+1. Create a few mandatory fields (column names): id, title, content
+1. Publish your spreadsheet and get the spreadsheet KEY from the shared URL (use the share button in Google Spreadsheet)
 1. Copy the KEY and paste it in the WPSync settings page.
-
 
 
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
+= Does the plugin overwrites the spreadsheet? =
 
-An answer to that question.
+No, it doesn't writes the spreadsheet. It is only accessed read only mode (at least for now)
 
-= What about foo bar? =
+= Is this plugin free? =
 
-Answer to foo bar dilemma.
+Yes, it is free.
 
 == Screenshots ==
 
