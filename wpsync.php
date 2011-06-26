@@ -138,7 +138,14 @@ function widget_wpsync_init() {
 		$url = "http://spreadsheets.google.com/feeds/list/{$key}/{$sheet}/public/values?alt=json";
 		echo 'Connecting to '.$url.'<br/>';
 		
-		$file= file_get_contents($url);
+		$file= @file_get_contents($url);
+		if (empty($file))
+		{
+			$message = 'Failed to retrieve spreadsheet. Could not run file_get_contents. Please check key is valid, sheet ID and spreadsheet is published to the web';
+			wpsync_show_error( $message );
+			return FALSE;
+		}
+		
 		$json = json_decode($file);
 		//var_dump($json);		
 		$posts_in_spreadsheet = array(); //array with external ids

@@ -68,30 +68,30 @@ function wpsync_show_ui_settings_page()
 				</div>
 				
 				<div>
-					<input type="checkbox" name="wpsync_allow_delete_from_spreadsheet" value="1" <?php echo (get_option('wpsync_allow_delete_from_spreadsheet')=='1'?'checked':''); ?> />
+					<input disabled="disabled" type="checkbox" name="wpsync_allow_delete_from_spreadsheet" value="1" <?php echo (get_option('wpsync_allow_delete_from_spreadsheet')=='1'?'checked':''); ?> />
 					Allow delete from spreadsheet? <span>Specifying "delete" status on spreadsheet</span>
 				</div>
 		
 				<div>
-					<input type="checkbox" name="wpsync_allow_update_from_spreadsheet" value="1" <?php echo (get_option('wpsync_allow_update_from_spreadsheet')=='1'?'checked':''); ?> />
+					<input disabled="disabled" type="checkbox" name="wpsync_allow_update_from_spreadsheet" value="1" <?php echo (get_option('wpsync_allow_update_from_spreadsheet')=='1'?'checked':''); ?> />
 					Check if entries are updated in the original spreadsheet and then update the posts in WordPress
 					<span></span>
 				</div>
 				
 				<div>
-					<input type="checkbox" name="wpsync_debug_mode" value="1" <?php echo (get_option('wpsync_debug_mode')=='1'?'checked':''); ?> />
+					<input disabled="disabled" type="checkbox" name="wpsync_debug_mode" value="1" <?php echo (get_option('wpsync_debug_mode')=='1'?'checked':''); ?> />
 					Debug mode enabled
 					<span></span>
 				</div>
 				
 				<div>
-					<input type="checkbox" name="wpsync_create_categories_if_not_exist" value="1" <?php echo (get_option('wpsync_create_categories_if_not_exist')=='1'?'checked':''); ?> />
+					<input disabled="disabled" type="checkbox" name="wpsync_create_categories_if_not_exist" value="1" <?php echo (get_option('wpsync_create_categories_if_not_exist')=='1'?'checked':''); ?> />
 					Should we create categories automatically if not exist?
 					<span></span>
 				</div>
 				
 				<div>
-					<input type="checkbox" name="wpsync_create_tags_if_not_exist" value="1" <?php echo (get_option('wpsync_create_tags_if_not_exist')=='1'?'checked':''); ?> />
+					<input disabled="disabled" type="checkbox" name="wpsync_create_tags_if_not_exist" value="1" <?php echo (get_option('wpsync_create_tags_if_not_exist')=='1'?'checked':''); ?> />
 					Should we create tags automatically if not exist?
 					<span></span>
 				</div>
