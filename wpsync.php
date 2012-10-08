@@ -14,16 +14,25 @@ Here are some references that were used in order to build this plugin:
 * Github gist code https://gist.github.com/770584
 * Google Spreadsheet Documentation API 3.0 http://code.google.com/intl/es/apis/documents/docs/3.0/developers_guide_protocol.html
 * Code for listing feeds http://code.google.com/intl/es/apis/spreadsheets/data/3.0/developers_guide.html#ListFeeds
+*
+*
+* Fields:
+* post_category: array containing category ID
+* date:
 
 */ 
 
 require_once(dirname(__FILE__) . '/wpsync-ui.php');
 
+
+	
 function widget_wpsync_init() {
 
 	// create custom plugin settings menu
 	add_action('admin_menu', 'wpsync_create_menu');
-
+	
+	
+	
 	function wpsync_create_menu() {
 
 		//create new top-level menu - maybe we should move this under settings later
@@ -40,6 +49,8 @@ function widget_wpsync_init() {
 		register_setting( 'wpsync-settings-group', 'wpsync_spreadsheet_sheet' );
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_delete_from_spreadsheet' );
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_update_from_spreadsheet' );
+		register_setting( 'wpsync-settings-group', 'wpsync_allow_update_fields' );
+		
 		register_setting( 'wpsync-settings-group', 'wpsync_allow_delete_from_spreadsheet' );
 		
 		// for categories and other options
@@ -47,6 +58,7 @@ function widget_wpsync_init() {
 		register_setting( 'wpsync-settings-group', 'wpsync_create_tags_if_not_exist' );
 		register_setting( 'wpsync-settings-group', 'wpsync_default_category' );
 		register_setting( 'wpsync-settings-group', 'wpsync_default_tags' );
+		register_setting( 'wpsync-settings-group', 'wpsync_default_post_type' );
 		
 		register_setting( 'wpsync-settings-group', 'wpsync_debug_mode' );
 		
@@ -59,7 +71,7 @@ function widget_wpsync_init() {
 		$wpsync_form_action = $_POST['wpsync_form_action'];
 		
 		
-		$message = "Please notice this plugin is still under development. If you have questions, suggestions or any other comment please kindly write to julianmagnone@gmail.com ";
+		$message = "Please notice this plugin is still under development. If you have questions, suggestions or any other comment kindly write to <a href=mailto:julianmagnone@gmail.com>julianmagnone@gmail.com</a> ";
 		wpsync_show_message($message);
 		
 		
@@ -116,27 +128,56 @@ function widget_wpsync_init() {
 		
 		wpsync_parse_spreadsheet($key);
 	}
-	
-	/*
-	function wpsync_connect_google()
-	{
-//		https://gist.github.com/770584		 
-		wpsync_parse_spreadsheet($key);
-	}*/
-	
+
 	function wpsync_parse_spreadsheet($key, $only_preview = TRUE)
 	{
+		$wpsync_debug_mode = get_option('wpsync_debug_mode', FALSE);
+		$wpsync_allow_update_from_spreadsheet = get_option('wpsync_allow_update_from_spreadsheet', FALSE);
+		$wpsync_allow_update_fields = get_option('wpsync_allow_update_fields');
 	
 		$sheet = trim(get_option('wpsync_spreadsheet_sheet'));
 		if (empty($sheet))
 		{
 			$sheet = "1";
 		}
-		
 	
 		// Parsing this spreadsheet
 		$url = "http://spreadsheets.google.com/feeds/list/{$key}/{$sheet}/public/values?alt=json";
+		//https://spreadsheets.google.com/feeds/worksheets/key/private/full
+		
+		echo '<div id="poststuff">';
+		
 		echo 'Connecting to '.$url.'<br/>';
+
+		$url_cells = "http://spreadsheets.google.com/feeds/cells/{$key}/{$sheet}/public/values?alt=json";
+		$cells_file = @file_get_contents($url_cells);
+		if (empty($cells_file))
+		{
+			$message = 'Failed to retrieve spreadsheet cells. Could not run file_get_contents. Please check key is valid, sheet ID and spreadsheet is published to the web';
+			wpsync_show_error( $message );
+			return FALSE;
+		} else {
+		}
+	
+		// get the titles
+		$json_cells = json_decode($cells_file);
+		$columns = array();
+		$cols = array();
+		foreach ($json_cells->feed->entry as $cellEntry)
+		{
+			$titlearr = (array)$cellEntry->title;
+			$valuearr = (array)$cellEntry->content;
+			//$text = ($objarr['$t']);
+			
+			$columnNumber  = $titlearr['$t'];
+			$columnLabel  = $valuearr['$t'];
+			//echo "Column $columnNumber is labeled $columnLabel<br>\n";
+			$columns[$columnNumber] = $columnLabel;
+			$cols[] = $columnLabel;
+		}
+		//var_dump($json_cells);
+		//return FALSE;
+		
 		
 		$file= @file_get_contents($url);
 		if (empty($file))
@@ -151,53 +192,108 @@ function widget_wpsync_init() {
 		$posts_in_spreadsheet = array(); //array with external ids
 		$indexes_ss_updated = array(); // used to keep a track about posts indexes in ss that were updated or not
 		
-		$i = 0;
-		$rows = $json->{'feed'}->{'entry'};
-
-		if (empty($rows))
+		// ---
+		
+		$reserved_column_names = array('id', 'post_title', 'post_content', 'post_date', 'post_category', 'post_tags', 'post_type');
+		$mandatory_column_names = array('post_title', 'post_content');
+		
+		if ($wpsync_allow_update_from_spreadsheet AND !empty($wpsync_allow_update_fields))
 		{
-			$message = 'Failed to retrieve spreadsheet. Please check key is valid and spreadsheet is published to the web';
-			wpsync_show_error( $message );
-			return FALSE;
+			echo 'If a post already exist in WordPress, we will try to update it from spreadsheet. Only the following fields will be updated: '.$wpsync_allow_update_fields .'<br/>';
+		} else {
+			echo 'If a post is already in WordPress, then it would not be updated. If you need to update existing posts from your spreadsheet, you can change the Allow Update setting.';
 		}
 		
+		$i = 0;
+		$cells = $json_cells->{'feed'}->{'entry'};
+		$prevrow = null;
+		$values = array();
+		$values_meta = array();
 		$cols = array();
-		foreach($rows as $row) {
+		$notices = array();
+		foreach( $cells as $cell )
+		{
+			$x = (int)$cell->{'gs$cell'}->{'col'};
+			$y = (int)$cell->{'gs$cell'}->{'row'};
+			$celltext = $cell->{'gs$cell'}->{'$t'};
+			$celltexti = strtolower($celltext);
 			
-			if ($i==0)
+			if ($y==1)
 			{
 				// First row; Get columns
-				$cell = (array) $row;
-				foreach($cell as $key => $val)
-				{
-					// Check titles
-					if ( substr($key, 0, 4) == 'gsx$')
-					{
-						//echo 'colname:['. substr($key, 4).']<br/>';
-						$cols[] = substr($key, 4);
-					}
-				}
+				$cols[$x-1] = $celltext;
 				
-				// $cols contains a list of columns from the spreadsheet
-				// the first iteration is on charge of getting these values then we'll need to see what values to insert
-				// in the post or update
+				$i++;
+				continue;
 			}
-			$i++;
-
-			$values = array();
-			$values_meta = array();
-			foreach($cols as $col)
+			
+			if (!empty($prevrow) AND $y > $prevrow )
 			{
-				//if ($col == 'id') $col = 'external_id'; // If id then use external_id
-				
-				if (substr($col,0,4)=='meta')
+				if (!empty($values['id']))
 				{
-					// meta field
-					$values_meta[substr($col,4)] = $row->{'gsx$'.$col}->{'$t'};
-				}else{
-					// normal field 
-					$values[$col] = $row->{'gsx$'.$col}->{'$t'};
+					$final_values = array();
+					$final_values_meta = array();
+					foreach( $cols as $colname )
+					{
+						if (in_array($colname, $reserved_column_names))
+						{
+							if ($values[$colname] == null) $values[$colname] = "";
+							
+							$final_values[$colname] = $values[$colname];
+						} else {
+					
+							if ($values_meta[$colname] == null) $values_meta[$colname] = "";
+													
+							$final_values_meta[$colname] = $values_meta[$colname];
+						}
+					}
+					
+					foreach($mandatory_column_names as $mandatorycolname)
+					{
+						if (!array_key_exists ( $mandatorycolname , array_flip($cols) ))
+						{
+							$notices[$values['id']][] = "Required value for {$mandatorycolname} not present for this entry.";
+						}
+					}
+					
+					$final_values['meta'] = $final_values_meta;
+					
+					
+					//$posts_in_spreadsheet[] = array('title'=>$title, 'content'=>$content, 'external_id'=>$id);
+					// check mandatory fields
+					/*foreach($mandatory_column_names as $mc)
+					{
+						
+					}*/
+					
+					$posts_in_spreadsheet[] = $final_values;
+					//var_dump($final_values);
+					//var_dump($values['meta']);
+					
+					
+				} else {
+					
+					// echo 'discard';
 				}
+				
+				
+				// Reset arrays
+				$values = array();
+				$values_meta = array();
+			}
+			
+			//
+			// if $y > 1, so... rows;
+			//
+			
+			if (in_array( strtolower($cols[$x-1]), $reserved_column_names) )
+			{
+				//echo 'ok';
+				$values[$cols[$x-1]] = $celltext;
+			
+			} else {
+			
+				$values_meta[$cols[$x-1]] = $celltext;
 			}
 			
 			//echo 'values';
@@ -212,15 +308,11 @@ function widget_wpsync_init() {
 			echo '</p>';
 
 			// If not empty id, then synchronize, otherwise skip (great if you plan to add drafts)
-			if (!empty($values['id']))
-			{
-				// Assign meta values to values
-				$values['meta'] = $values_meta;
 			
-				//$posts_in_spreadsheet[] = array('title'=>$title, 'content'=>$content, 'external_id'=>$id);
-				$posts_in_spreadsheet[] = $values;
-			}
+			$prevrow = $y;			
 		}
+
+		//var_dump($notices);
 		
 		$args = array(
 			//'orderby' => 'title',
@@ -233,9 +325,11 @@ function widget_wpsync_init() {
 					'compare' => '!='
 				)
 			),
-			//'post_status' => array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash')   
-			//'post_status' => 'draft'
+			//'post_status' => array('publish', 'pending', 'draft', 'auto-draft', 'future', 'private', 'inherit', 'trash'),
+			//'post_status' => 'draft',
+			'post_type' => 'any',
 		);
+
 		//$posts = get_posts($args);
 		$my_query = new WP_Query( $args );
 		echo $my_query->post_count . " posts found in WordPress already sync'ed"; 
@@ -254,9 +348,12 @@ function widget_wpsync_init() {
 			//var_dump($post);echo '<br/>';
 		endwhile;
 
+		echo '<br/>';
+		if ($wpsync_debug_mode) { "List of posts: "; var_dump($posts_in_wordpress); }
+		
 
 		echo '<br/>Processing Posts in spreadsheet source: ';
-		echo count($posts_in_spreadsheet).' were found.<br/><br/>';
+		echo count($posts_in_spreadsheet).' were found.';
 		//print_r($posts_in_spreadsheet);
 		
 		echo '<br/>Processing Posts in Wordpress: ';
@@ -277,14 +374,17 @@ function widget_wpsync_init() {
 				$postss['external_id'] = $postss['id'];			
 				if ($postwp['external_id']==$postss['id'])
 				{
-					echo 'Processing post post_id='.$postwp['id'].' spreadsheet row id='.$postss['external_id'].' - entry already exist in WP!<br/>';
+					echo 'Processing post_id='.$postwp['id'].' spreadsheet row id='.$postss['external_id'].'.';
+					echo '<br/>';
 					$indexes_ss_updated[] = $i;  // indexes in spreadsheet that were updated (if not here, then we'll insert new entries later)
 				}
 			}
 		}
 		
-		echo '<br/>Posts in spreadsheet<br/>';
-		echo count($posts_in_spreadsheet). ' posts found in the spreadsheet<br/><br/>';
+		echo '<br/><br/>';
+		
+		//echo '<br/>Posts in spreadsheet<br/>';
+		//echo count($posts_in_spreadsheet). ' posts found in the spreadsheet<br/><br/>';
 		//print_r($posts_in_spreadsheet);
 		
 		//
@@ -298,15 +398,25 @@ function widget_wpsync_init() {
 		{
 			$categories_map[strtolower($cat->cat_name)] = $cat->cat_id;
 		}
+
+		
+		$taxonomies = get_taxonomies();
+		//var_dump($taxonomies);
+
+	
 		
 		if (!$only_preview)
 		{
 			$default_category = get_option('wpsync_default_category', null);
+			$existing_categories = get_categories();
 			
 			$config = array(
 						'default_category' => array($default_category),
 						'default_tags' => get_option('wpsync_default_tags', null),
-						'default_status' => get_option('wpsync_default_status', 'draft' )
+						'default_status' => get_option('wpsync_default_status', 'draft' ),
+						'existing_categories' => $existing_categories,
+						'default_post_type' => get_option('wpsync_default_post_type', 'draft' ),
+						'taxonomies' => $taxonomies,
 					);
 			
 			
@@ -316,17 +426,23 @@ function widget_wpsync_init() {
 				$postss = $posts_in_spreadsheet[$i];
 				if (in_array($i, $indexes_ss_updated))
 				{
-
+					$allow_update = get_option('wpsync_allow_update_from_spreadsheet');
+					if (!empty($allow_update) AND ($allow_update == TRUE))
+					{
+						$postss['external_id'] = $postss['id'];
+						wpsync_sync_post_update( $postss, null, $config );
+					}					
+				
 				}else
 				{
-					$category = $postss['category'];
+					$category = $postss['category'] OR $postss['post_category'];
 					if (!empty($category) AND !empty($categories_map[$category]))
 					{
 						$postss['post_category'] = array( $categories_map[$category] );
 						//echo 'category : '.print_r($postss['post_category'], TRUE);
 					}
 					
-					$tags = $postss['tags'];
+					$tags = $postss['tags'] OR $postss['post_tags'];
 					if (!empty($tags))
 					{
 						$postss['tags_input'] = $tags;
@@ -342,32 +458,82 @@ function widget_wpsync_init() {
 			
 		} else {
 		
-			wpsync_show_preview( $posts_in_spreadsheet );
+			//print_r($posts_in_spreadsheet);
+		
+			wpsync_show_preview( $posts_in_spreadsheet, $cols, $notices );
 		
 			echo 'Preview is done!';
 		}
+		
+		echo '</div>';
 		
 	}
 	
 	function wpsync_sync_post($values, $meta = null, $config = null)
 	{
+		$wpsync_debug_mode = get_option('wpsync_debug_mode', FALSE);
 		
-		if (!empty($config['default_category'])) $post_category = $config['default_category'];
-		if (!empty($config['default_tags'])) $tags_input = $config['default_tags'];
+		if (!empty($config['default_category'])) $category = $config['default_category'];
+		if (!empty($config['default_tags'])) $tags = $config['default_tags'];
 		if (!empty($config['default_status'])) $status = $config['default_status'];
+		if (!empty($config['default_post_type'])) $post_type = $config['default_post_type'];
 
 		extract( $values );
 
-	
+		// Currently only supports Category ID but we should do something to support names, too
+		if (!empty($category) AND !is_array($category)) $category = split(',',$category); // wp_insert expect an array instead of a single val
+
+		if (!empty($post_category)) $category = split(',',$post_category);
+		if (!empty($post_tags)) $tags = $post_tags; 
+		
+		//var_dump($config['existing_categories'] );
+		
 		// Create post object
 		$my_post = array(
-			'post_title' => $title,
-			'post_content' => $content,
+			'post_title' => $post_title,
+			'post_content' => $post_content,
 			'post_status' => $status,
 			'post_author' => 1,
-			'post_category' => $post_category,
-			'tags_input'=> $tags_input ,
+			'post_category' => $category,
+			'tags_input'=> $tags,
+			'post_type' => $post_type,
 		);
+
+		if (empty($date)) $date = $post_date; // just to use date instead of post_date
+		
+		// Check if post is for the future
+		if (!empty($date))
+		{
+			$date_ts = strtotime($date);
+			$date  = date('Y-m-d h:i', $date_ts);
+			
+			$my_post['post_date'] = $date;
+			$my_post['post_date_gmt'] = $date;
+			if ($date_ts > time())
+			{
+				$my_post['post_status'] = 'future';
+			}
+		}
+		
+		// Insert Category
+		
+		if (TRUE AND is_array($category))
+		{
+			$new_cats = array();
+			foreach($category as $cat)
+			{
+				if (is_numeric($cat))
+				{
+					$new_cats[] = $cat;
+				}else{
+					echo 'Inserting new category '.$cat.'<br/>';
+					$new_cat_id = wp_create_category( $cat ); 
+					if ($new_cat_id > 0) $new_cats[] = $new_cat_id;
+				}
+			}
+			$my_post['post_category'] = $new_cats;
+		}
+		
 		
 		//var_dump($my_post);
 
@@ -377,13 +543,14 @@ function widget_wpsync_init() {
 		if (is_object($res))
 		{
 			echo 'Error inserting post: ';
-			var_dump($res);
+			//var_dump($res);
+			var_dump($res->errors);
 			echo '<br/>';
 		} else {
 		
 			$post_id = (int)$res;
 			
-			echo "Inserting new post in WordPress ".$post_id." Title:{$title} Status:{$status}   <br/>";
+			if ($wpsync_debug_mode) echo "Inserting new post in WordPress ".$post_id." Title:{$title} Status:{$status}   <br/>";
 			
 			var_dump($post_id);
 			
@@ -399,9 +566,138 @@ function widget_wpsync_init() {
 			
 			foreach($meta as $meta_key => $meta_value)
 			{
-				add_post_meta($post_id, $meta_key, $meta_value, TRUE);
+				$taxonomies = $config['taxonomies'];
+				$taxonomy_values = array_keys($taxonomies);
+				if (!empty($taxonomies) AND in_array($meta_key, $taxonomy_values))
+				{
+					// add a value for taxonomy
+					$term_values = split(',', $meta_value);
+					$res = wp_set_object_terms($post_id, $term_values, $meta_key);
+					
+					if ($wpsync_debug_mode) echo "Inserting new taxonomy value in post ". $post_id . print_r($meta_value, TRUE).$meta_key." <br/>";
+					var_dump($res);
+					
+				} else {
+					// add as meta tag
+					add_post_meta($post_id, $meta_key, $meta_value, TRUE);
+					
+					if ($wpsync_debug_mode) echo "Inserting meta value in post ".$post_id." <br/>";
+				}
 			}
 		}
+	}
+	
+	function wpsync_sync_post_update($values, $meta = null, $config = null)
+	{
+		$wpsync_debug_mode = get_option('wpsync_debug_mode', FALSE);
+	
+		extract( $values );
+
+		// Currently only supports Category ID but we should do something to support names, too
+		if (!empty($category) AND !is_array($category)) $category = split(',',$category); // wp_insert expect an array instead of a single val
+
+		if (!empty($post_category)) $category = split(',',$post_category);
+		if (!empty($post_tags)) $tags = $post_tags; 
+
+		$fields_str = get_option('wpsync_allow_update_fields');
+		$fields = split(',',$fields_str);
+		
+		if (empty($fields))
+		{
+			echo 'Nothing to update (list of fields to update is empty) for post<br/>';
+ 			return false;
+		}
+		
+		
+		$post = get_posts( array(
+				'numberposts' => 1,
+				'meta_key' => 'wpsync_external_id', 
+				'meta_value' => $values['id'],
+				'post_type' => 'any',				
+				) );
+				
+
+		$args = array(
+			'posts_per_page' => 1,
+			'meta_query' => array(
+				array(
+					'key' => 'wpsync_external_id',
+					'value' => $values['id'],
+				)
+			),
+			'post_type' => 'any',
+		);
+		$my_query = new WP_Query( $args );
+		$post = null;
+		while ($my_query->have_posts())
+		{
+			$my_query->the_post();
+			$post = $my_query->post;
+			break;
+		}
+	
+		if (empty($post))
+		{
+			echo 'Error retrieving post with external_id = '.$values['id'];
+			return false;
+		}
+		
+		$my_post = array();
+		$my_post['ID'] = $post->ID;
+		
+		//var_dump($fields);
+		foreach($fields as $field)
+		{
+			$field = trim($field);
+			$my_post[$field] = @$$field;
+		}
+
+		// Insert the post into the database
+		if ($wpsync_debug_mode) echo 'Updating post '.$post->ID.'<br/>';
+		$res = wp_update_post( $my_post );
+	  
+		if (is_object($res))
+		{
+			echo 'Error inserting post: ';
+			var_dump($res->errors);
+			echo '<br/>';
+		} else {
+		
+			$post_id = $post->ID;
+			if ($wpsync_debug_mode) echo "Updating new post Meta Data  ".$post_id." Title:{$title} Status:{$status}   <br/>";
+			
+			//var_dump($post_id);
+			
+			// Add Updated Date
+			$meta_key = "wpsync_updated_on";
+			$meta_value = date('Y-m-d H:i:s');
+			add_post_meta($post_id, $meta_key, $meta_value, TRUE);
+			
+			foreach($meta as $meta_key => $meta_value)
+			{
+				if (in_array($meta_key, $fields))
+				{
+					$taxonomies = $config['taxonomies'];
+					$taxonomy_values = array_keys($taxonomies);
+					if (!empty($taxonomies) AND in_array($meta_key, $taxonomy_values))
+					{
+						// add a value for taxonomy
+						$term_values = split(',', $meta_value);
+						$res = wp_set_object_terms($post_id, $term_values, $meta_key);
+						
+						if ($wpsync_debug_mode ) echo "Updating new taxonomy value in post ". $post_id . print_r($meta_value, TRUE).$meta_key." <br/>";
+						//var_dump($res);
+						
+					} else {
+						// add as meta tag
+						update_post_meta($post_id, $meta_key, $meta_value);
+						
+						if ($wpsync_debug_mode ) echo "Updating meta value in post ".$post_id." <br/>";
+					}
+				}
+			}
+		}
+
 	}
 	
 	

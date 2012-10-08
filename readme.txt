@@ -3,28 +3,27 @@ Contributors: jmagnone
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VVE9SYHSM38FY
 Tags: google, spreadsheets, import, synchronize, posts, edit
 Requires at least: 3.1
-Tested up to: 3.1.3
-Stable tag: 0.1.1
+Tested up to: 3.4.2
+Stable tag: 1.0.6
 
-WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP posts.
-
+WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP posts. You can use this plugin to import a Google Spreadsheet as individual blog posts. The plugin also will help you to import custom post types for example if you are preparing a business directory or event website.
 
 == Description ==
 
-WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts.
-
-This plugin is useful for example if you want to import lot of rows from a spreadsheet into separate posts and it is intended to be used for those who need a simple way to enter blog posts and don't like to use the Quick Post feature at WordPress.
+WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts. This plugin is useful for example if you want to import lot of rows from a spreadsheet into separate posts and it is intended to be used for those who need a simple way to enter blog posts and don't like to use the Quick Post feature at WordPress.
 
 Instead, you can just write your post drafts into a spreadsheet and configure the plugin to synchronize your rows with WordPress.
 
-I coded this plugin for my own usage but after getting some user's feedback I decided to publish it on the directory.
+I coded this plugin for my personal use but after getting some user's feedback I decided to publish it on the WP plugin's directory. You can use this plugin to import a Google Spreadsheet as individual blog posts. The plugin also will help you to import custom post types for example if you are preparing a business directory or event website.
 
 What you can expect from this plugin:
 
-* Helps you importing rows from a Google Spreadsheet into separeted posts in WordPress.
+* Helps you importing rows from a Google Spreadsheet into individual posts in WordPress.
 * Use the Google Spreadsheet to enter ideas and post drafts, for example if you are developing domain names with WordPress or niche websites, but also useful for directories (ie: with local info, phone numbers, custom fields, etc.)
+* Import spreadsheet rows as individual posts or custom post types.
+* Support custom fields and taxonomies (categories, tags, etc.)
 
-What you can't expect from this plugin (at least in the initial releases):
+What you shouldn't expect from this plugin (at least in the initial releases):
 
 * In the initial version the utility works from Google Spreadsheets into WordPress but not viceversa. We'll eventually add the opposite direction soon.
 * This version doesn't writes back any change on the Google Spreadsheet so the Spreadsheet is only used as read only.
@@ -41,7 +40,7 @@ What you can't expect from this plugin (at least in the initial releases):
 In order to use your Spreadsheet created in Google Docs, you need to:
 
 1. Create a new spreadsheet in Google Docs
-1. Create a few mandatory fields (column names): id, title, content
+1. Create a few mandatory fields (column names): id, post_title, post_content (see the Plugin Settings page for more info and to find a template)
 1. Publish your spreadsheet and get the spreadsheet KEY from the shared URL (use the share button in Google Spreadsheet)
 1. Copy the KEY and paste it in the WPSync settings page.
 
@@ -65,17 +64,16 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 
 == Changelog ==
 
-= 0.1 =
-* Initial version, basic functionality to retrieve rows from spreadsheet and import into WordPress posts
+= 1.0.6 =
+* Major upgrade to support new Google Docs API
+* Now the required fields are id, post_title, post_content
+* Custom post types and taxonomies are supported
+* Update from spreadsheet is supported
 
 == Upgrade Notice ==
 
-= 0.1 =
-Nothing to upgrade
-
-== Arbitrary section ==
-
-Nothing here yet.
+= 1.0.6 =
+Important update with new features. If you was using this plugin please make sure to adapt your spreadsheet header columns. There are some required fields like id, post_title, post_content that you should respect. Additionally, in this version meta values should not use meta_ prefix. Contact us if you need free support for the upgrade.
 
 == Nothing here yet ==
 
