@@ -1,11 +1,11 @@
 <?php
 /* 
 Plugin Name: Magn WPSync
-Plugin URI: http://netvivs.com/wpsync/
-Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into WP posts.
-Version: 0.1
+Plugin URI: http://magn.com/wpsync/
+Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into individual WordPress posts.
+Version: 1.0.6
 Author: Julian Magnone (julianmagnone@gmail.com)
-Author URI: http://jmagnone.com/
+Author URI: http://magn.com
 
 Please see WordPress.org default GPL licenses to know more about the license applied for this plugin.
 
