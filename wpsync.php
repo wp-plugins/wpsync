@@ -14,11 +14,11 @@ Here are some references that were used in order to build this plugin:
 * Github gist code https://gist.github.com/770584
 * Google Spreadsheet Documentation API 3.0 http://code.google.com/intl/es/apis/documents/docs/3.0/developers_guide_protocol.html
 * Code for listing feeds http://code.google.com/intl/es/apis/spreadsheets/data/3.0/developers_guide.html#ListFeeds
-*
-*
+**
 * Fields:
 * post_category: array containing category ID
 * date:
+*
 
 */ 
 
