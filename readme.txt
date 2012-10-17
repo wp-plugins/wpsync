@@ -1,12 +1,12 @@
-=== Plugin Name ===
+﻿=== Plugin Name ===
 Contributors: jmagnone
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VVE9SYHSM38FY
-Tags: google, spreadsheets, import, synchronize, posts, edit
+Tags: google, spreadsheets, import, synchronize, posts, edit, convert, google docs, excel, csv
 Requires at least: 3.1
 Tested up to: 3.4.2
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 
-WP Sync is a simple plugin that helps you to import Google Spreadsheet into WP posts. You can use this plugin to import a Google Spreadsheet as individual blog posts. The plugin also will help you to import custom post types for example if you are preparing a business directory or event website.
+WP Sync is a very simple plugin for WordPress that helps you to import Google Spreadsheet into individual WP posts. You can use this plugin to import a Google Spreadsheet into individual blog posts for example if you are preparing a business directory or importing a large spreadsheet with data into your blog or website. In recent versions of the plugin it also supports to import Custom Fields or meta values, so you can easily prepare a spreadsheet in Google Docs with all the information to be importer and the plugin will do it.
 
 == Description ==
 
@@ -63,6 +63,9 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 2. This is the second screen shot
 
 == Changelog ==
+
+= 1.0.7 =
+* Fix the trim bug in the list of custom values to update
 
 = 1.0.6 =
 * Major upgrade to support new Google Docs API

@@ -3,7 +3,7 @@
 Plugin Name: Magn WPSync
 Plugin URI: http://magn.com/wpsync/
 Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into individual WordPress posts.
-Version: 1.0.6
+Version: 1.0.7
 Author: Julian Magnone (julianmagnone@gmail.com)
 Author URI: http://magn.com
 
@@ -455,6 +455,8 @@ function widget_wpsync_init() {
 				}
 			}
 			echo 'Done!';
+			echo "<a class='button-secondary' href='javascript:history.back()'>Back</a>";
+			
 			
 		} else {
 		
@@ -601,6 +603,7 @@ function widget_wpsync_init() {
 
 		$fields_str = get_option('wpsync_allow_update_fields');
 		$fields = split(',',$fields_str);
+		$fields = array_map('trim', $fields);
 		
 		if (empty($fields))
 		{
@@ -608,14 +611,12 @@ function widget_wpsync_init() {
  			return false;
 		}
 		
-		
 		$post = get_posts( array(
 				'numberposts' => 1,
 				'meta_key' => 'wpsync_external_id', 
 				'meta_value' => $values['id'],
 				'post_type' => 'any',				
 				) );
-				
 
 		$args = array(
 			'posts_per_page' => 1,
@@ -675,7 +676,7 @@ function widget_wpsync_init() {
 			
 			foreach($meta as $meta_key => $meta_value)
 			{
-				if (in_array($meta_key, $fields))
+				if (in_array($meta_key, $fields ))
 				{
 					$taxonomies = $config['taxonomies'];
 					$taxonomy_values = array_keys($taxonomies);
@@ -692,53 +693,16 @@ function widget_wpsync_init() {
 						// add as meta tag
 						update_post_meta($post_id, $meta_key, $meta_value);
 						
-						if ($wpsync_debug_mode ) echo "Updating meta value in post ".$post_id." <br/>";
+						if ($wpsync_debug_mode ) echo "Updating meta value '{$meta_value}' in post ".$post_id." <br/>";
 					}
 				}
+				
 			}
 		}
 
 	}
 	
 	
-	
-	
-	
-	function wpsync_auth_google()
-	{
-		include_once('c:\\xampp\\htdocs\\include3.php');
-	
-		// Construct an HTTP POST request
-		$clientlogin_url = "https://www.google.com/accounts/ClientLogin";
-		$clientlogin_post = array(
-			"accountType" => "HOSTED_OR_GOOGLE",
-			"Email" => "julianmagnone@gmail.com",
-			"Passwd" => $pp,
-			"service" => "writely",
-			"source" => "WPSync"
-		);
-
-		// Initialize the curl object
-		$curl = curl_init($clientlogin_url);
-
-		// Set some options (some for SHTTP)
-		curl_setopt($curl, CURLOPT_POST, true);
-		curl_setopt($curl, CURLOPT_POSTFIELDS, $clientlogin_post);
-		curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_ANY);
-		curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-
-		// Execute
-		$response = curl_exec($curl);
-
-		// Get the Auth string and save it
-		preg_match("/Auth=([a-z0-9_\-]+)/i", $response, $matches);
-		$auth = $matches[1];
-
-		echo "The auth string is: " . $auth;
-	
-		return $auth;
-	}
 	
 	function wpsync_open_spreadsheet($auth, $key)
 	{
