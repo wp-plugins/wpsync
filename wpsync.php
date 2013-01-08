@@ -3,7 +3,7 @@
 Plugin Name: Magn WPSync
 Plugin URI: http://magn.com/wpsync/
 Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into individual WordPress posts.
-Version: 1.0.7
+Version: 1.0.8
 Author: Julian Magnone (julianmagnone@gmail.com)
 Author URI: http://magn.com
 
@@ -19,7 +19,10 @@ Here are some references that were used in order to build this plugin:
 * post_category: array containing category ID
 * date:
 *
-
+* Wish List
+* ---------
+* Give users an event-specific (each row) option to set Publish or Draft status on the spreadsheet, instead of all or nothing. For the events that were already sync'd as draft, I currently cannot change the status on the spreadsheet. I need to go to the Event WP Admin section and change them in bulk or each one. 
+*
 */ 
 
 require_once(dirname(__FILE__) . '/wpsync-ui.php');
