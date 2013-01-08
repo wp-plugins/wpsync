@@ -29,7 +29,7 @@ What you shouldn't expect from this plugin (at least in the initial releases):
 * This version doesn't writes back any change on the Google Spreadsheet so the Spreadsheet is only used as read only.
 * Google Spreadsheets doesn't support rich text format, so if you need HTML for your content you can do that by using HTML tags in the cells
 
-Link to [http://magn.com] 
+Link to [Magn](http://magn.com/ "Simple but useful plugins") and author's profile [Julian Magnone](https://plus.google.com/109045091422552341246)
 
 
 == Installation ==
