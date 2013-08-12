@@ -2,8 +2,8 @@
 /* 
 Plugin Name: Magn WPSync
 Plugin URI: http://magn.com/wpsync/
-Description: WP Sync is a simple plugin that helps you to import Google Spreadsheet rows into individual WordPress posts.
-Version: 1.0.8
+Description: WP Sync is a very simple plugin that helps you to import Google Spreadsheet rows into individual WordPress posts. Currently it only supports one-way importing feature into WordPress (it won't update the spreadsheet)
+Version: 1.0.9
 Author: Julian Magnone (julianmagnone@gmail.com)
 Author URI: http://magn.com
 
@@ -153,10 +153,11 @@ function widget_wpsync_init() {
 		echo 'Connecting to '.$url.'<br/>';
 
 		$url_cells = "http://spreadsheets.google.com/feeds/cells/{$key}/{$sheet}/public/values?alt=json";
-		$cells_file = @file_get_contents($url_cells);
+		//$cells_file = @file_get_contents($url_cells);
+		$cells_file = @wp_remote_fopen($url_cells);
 		if (empty($cells_file))
 		{
-			$message = 'Failed to retrieve spreadsheet cells. Could not run file_get_contents. Please check key is valid, sheet ID and spreadsheet is published to the web';
+			$message = 'Failed to retrieve spreadsheet cells. Could not run wp_remote_fopen(). Please check key is valid, sheet ID and spreadsheet is published to the web';
 			wpsync_show_error( $message );
 			return FALSE;
 		} else {
@@ -182,10 +183,11 @@ function widget_wpsync_init() {
 		//return FALSE;
 		
 		
-		$file= @file_get_contents($url);
+		//$file= @file_get_contents($url);
+		$file = @wp_remote_fopen($url);		
 		if (empty($file))
 		{
-			$message = 'Failed to retrieve spreadsheet. Could not run file_get_contents. Please check key is valid, sheet ID and spreadsheet is published to the web';
+			$message = 'Failed to retrieve spreadsheet. Could not run wp_remote_fopen(). Please check key is valid, sheet ID and spreadsheet is published to the web';
 			wpsync_show_error( $message );
 			return FALSE;
 		}
