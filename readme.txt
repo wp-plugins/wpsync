@@ -2,11 +2,11 @@
 Contributors: jmagnone
 Donate link: https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=VVE9SYHSM38FY
 Tags: google, spreadsheets, import, synchronize, posts, edit, convert, google docs, excel, csv
-Requires at least: 3.1
-Tested up to: 3.6
+Requires at least: 3.5
+Tested up to: 4.1.1
 Stable tag: trunk
 
-WP Sync is a very simple plugin for WordPress that helps you to import Google Spreadsheet into individual WP posts. You can use this plugin to import a Google Spreadsheet into individual blog posts for example if you are preparing a business directory or importing a large spreadsheet with data into your blog or website. In recent versions of the plugin it also supports to import Custom Fields or meta values, so you can easily prepare a spreadsheet in Google Docs with all the information to be importer and the plugin will do it.
+WP Sync is a very simple plugin for WordPress that helps you to import Google Sheets into individual WP posts. You can use this plugin to import a Google Sheets spreadsheet into individual blog posts for example if you are preparing a business directory or importing a large spreadsheet with data into your blog or website. In recent versions of the plugin it also supports to import Custom Fields or meta values, so you can easily prepare a spreadsheet in Google Docs with all the information to be importer and the plugin will do it.
 
 == Description ==
 
@@ -49,6 +49,19 @@ In order to use your Spreadsheet created in Google Docs, you need to:
 
 == Frequently Asked Questions ==
 
+= Plugin is not working, nothing is synchronized. What to do next? =
+
+1. Google Sheets have changed lot of things since the first version of this plugin was developed. Even the product name was changed
+and renamed to Google Sheets. However, it is possible to make the plugin work and here are a few things you can check:
+1.1. Go to the spreadsheet in Google Sheets that you want to import into WordPress and then go to File -> Publish option.
+1.2. Click Publish Entire Document (or any particular sheet).
+1.3. Click Start Publishing button under "Published content & settings" section. Make sure Automatically republish when changes are made is checked.
+1.4. Copy the key and paste it in the WP Magn Sync plugin settings page. Now click Preview and see if the rows are shown in the screen.
+
+2. Another reason that could be preventing the plugin to work is if you are using custom post types. If you are using the column post_type in
+the spreadsheet, make sure the post_type is registered in your WordPress installation. The plugin uses get_post_types function in WP to get
+a list of post types registered.
+
 = Does the plugin overwrites the spreadsheet? =
 
 No, it doesn't writes the spreadsheet. It is only accessed read only mode (at least for now)
@@ -64,6 +77,10 @@ the directory of the stable readme.txt, so in this case, `/tags/4.3/screenshot-1
 2. This is the second screen shot
 
 == Changelog ==
+
+= 1.0.10 =
+* Changed query to include registered post types instead of 'any'
+* Small bug fixes
 
 = 1.0.7 =
 * Fix the trim bug in the list of custom values to update
